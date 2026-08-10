@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>20-Tote Inventory</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f5f5f7;color:#111}
+header{padding:18px;background:white;position:sticky;top:0;border-bottom:1px solid #ddd;z-index:2}
+h1{font-size:22px;margin:0 0 10px}.bar{display:flex;gap:8px}.bar input{flex:1;padding:12px;border:1px solid #bbb;border-radius:10px;font-size:16px}
+button{padding:11px 14px;border:1px solid #bbb;border-radius:10px;background:white;font-size:15px}
+main{padding:12px;max-width:700px;margin:auto}.card{background:white;border-radius:14px;padding:15px;margin:10px 0;box-shadow:0 1px 4px #0001}
+.card h2{margin:0 0 5px;font-size:18px}.muted{color:#666;font-size:14px}.field{margin-top:12px}.field label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;box-sizing:border-box;padding:10px;border:1px solid #bbb;border-radius:9px;font-size:16px}.field textarea{min-height:90px}
+.actions{display:flex;gap:8px;margin-top:14px}.save{background:#111;color:white}.hidden{display:none}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 15px;border-radius:10px;display:none}
+</style>
+</head>
+<body>
+<header>
+<h1>📦 Tote Inventory</h1>
+<div class="bar"><input id="search" placeholder="Search tote, item, category..."><button onclick="clearSearch()">Clear</button></div>
+</header>
+<main id="list"></main>
+<div id="toast"></div>
+<script>
+const KEY="toteInventory20_v1";
+const defaults=Array.from({length:20},(_,i)=>({id:`T-${String(i+1).padStart(3,"0")}`,rack:"A",position:i+1,category:"",contents:"",quantity:"",condition:"Good",notes:""}));
+let data=JSON.parse(localStorage.getItem(KEY)||"null")||defaults;
+function save(){localStorage.setItem(KEY,JSON.stringify(data));}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function render(){
+ const q=document.getElementById("search").value.toLowerCase().trim();
+ const list=document.getElementById("list");
+ list.innerHTML="";
+ data.filter(t=>!q||JSON.stringify(t).toLowerCase().includes(q)).forEach(t=>{
+  const d=document.createElement("div");d.className="card";
+  d.innerHTML=`<h2>${t.id}</h2><div class="muted">Rack ${esc(t.rack)} · Position ${esc(t.position)}</div>
+  <div class="field"><label>Category</label><input data-k="category" value="${esc(t.category)}"></div>
+  <div class="field"><label>Contents / Items</label><textarea data-k="contents" placeholder="Example: Christmas lights, extension cords...">${esc(t.contents)}</textarea></div>
+  <div class="field"><label>Quantity</label><input data-k="quantity" value="${esc(t.quantity)}"></div>
+  <div class="field"><label>Condition</label><select data-k="condition"><option>Good</option><option>Needs Repair</option><option>Damaged</option><option>Unknown</option></select></div>
+  <div class="field"><label>Notes</label><textarea data-k="notes">${esc(t.notes)}</textarea></div>
+  <div class="actions"><button class="save">Save ${t.id}</button><button onclick="copyId('${t.id}')">Copy ID</button></div>`;
+  d.querySelector('select').value=t.condition||"Good";
+  d.querySelectorAll("[data-k]").forEach(el=>el.addEventListener("input",()=>t[el.dataset.k]=el.value));
+  d.querySelector(".save").onclick=()=>{save();toast("Saved "+t.id);};
+  list.appendChild(d);
+ });
+ if(!list.children.length) list.innerHTML='<div class="card">No matching totes.</div>';
+}
+function toast(s){let x=document.getElementById("toast");x.textContent=s;x.style.display="block";setTimeout(()=>x.style.display="none",1200)}
+function clearSearch(){document.getElementById("search").value="";render()}
+function copyId(id){navigator.clipboard?.writeText(id);toast(id+" copied")}
+document.getElementById("search").addEventListener("input",render);
+const hash=location.hash.replace("#","");
+if(/^T-\d{3}$/.test(hash)){document.getElementById("search").value=hash}
+render();
+</script>
+</body>
+</html>
