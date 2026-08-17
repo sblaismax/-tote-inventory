@@ -1,52 +1,60 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tote Inventory v2</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tote Inventory v3</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;margin:0;background:#f3f4f6;color:#111827}
-header{background:#111827;color:white;padding:16px;position:sticky;top:0;z-index:5}
-h1{margin:0 0 12px;font-size:23px}.bar{display:flex;gap:8px;flex-wrap:wrap}
-button,.file{padding:11px 14px;border:0;border-radius:10px;font-size:16px;font-weight:600;background:white}
-main{max-width:760px;margin:auto;padding:14px}.search{display:flex;gap:8px}.search input{flex:1}
-input,textarea,select{width:100%;box-sizing:border-box;padding:11px;border:1px solid #cbd5e1;border-radius:9px;font:inherit;background:white}
-textarea{min-height:90px}label{font-weight:700;display:block;margin:10px 0 5px}
-.card{background:white;padding:16px;margin:12px 0;border-radius:16px;box-shadow:0 1px 5px #0001}
-.card h2{margin:0 0 3px}.muted{color:#64748b}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.primary{background:#16a34a;color:white}
-.photo{max-width:180px;max-height:180px;border-radius:10px;margin-top:8px}.status{color:#166534;margin-top:8px}
-@media(max-width:560px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
-</style></head><body>
-<header><h1>📦 Tote Inventory v2</h1><div class="bar">
-<button onclick="showAll()">All Totes</button><button onclick="newTote()">New Tote</button>
-<button onclick="backup()">Backup</button><label class="file">Restore<input hidden type="file" accept=".json" onchange="restore(event)"></label>
-</div></header><main>
+*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f3f4f6;color:#111827}header{background:#111827;color:white;padding:18px 16px 20px;position:sticky;top:0;z-index:5}h1{margin:0 0 14px;font-size:25px}.bar{display:flex;gap:10px;flex-wrap:wrap}button,.file{appearance:none;padding:13px 17px;border:0;border-radius:14px;font-size:17px;font-weight:700;background:white;color:#111827;min-height:48px;display:inline-flex;align-items:center;justify-content:center}.primary{background:#16a34a;color:white}.file{cursor:pointer}.file input{display:none}.search{display:flex;gap:8px;margin:14px 0}.search input{flex:1;min-width:0}input,textarea,select{width:100%;box-sizing:border-box;padding:13px;border:1px solid #cbd5e1;border-radius:12px;font:inherit;background:white}textarea{min-height:100px;resize:vertical}label{font-weight:700;display:block;margin:12px 0 6px}.card{background:white;padding:18px;margin:12px 0;border-radius:18px;box-shadow:0 1px 6px #0001}.card h2{margin:0 0 4px;font-size:28px}.muted{color:#64748b;font-size:17px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}.full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.actions button{font-size:15px;padding:11px 13px}.photo{max-width:180px;max-height:180px;border-radius:12px;margin-top:8px}.status{color:#166534;margin-top:9px;font-weight:600}.info{background:white;border-radius:14px;padding:12px 14px;color:#475569;margin-bottom:12px}.empty{padding:25px;text-align:center;color:#64748b}.count{font-weight:700;color:#111827}@media(max-width:560px){.grid{grid-template-columns:1fr}.full{grid-column:auto}header{padding-top:calc(16px + env(safe-area-inset-top))}}
+</style>
+</head>
+<body>
+<header>
+<h1>📦 Tote Inventory v3</h1>
+<div class="bar">
+<button onclick="showAll()">All Totes</button>
+<button onclick="newTote()">New Tote</button>
+<button onclick="backup()">Backup</button>
+<label class="file">Restore<input type="file" accept=".json,application/json" onchange="restore(event)"></label>
+</div>
+</header>
+<main>
+<div class="info"><span class="count" id="count"></span> &nbsp;•&nbsp; Data is saved on this iPhone.</div>
 <div class="search"><input id="search" placeholder="Search tote, item, category..." oninput="render()"><button onclick="clearSearch()">Clear</button></div>
-<div id="list"></div></main>
+<div id="list"></div>
+</main>
 <script>
-const KEY="toteInventoryV2";
-let totes=JSON.parse(localStorage.getItem(KEY)||"null")||Array.from({length:20},(_,i)=>({id:"T-"+String(i+1).padStart(3,"0"),rack:"Rack A",position:i+1,category:"",contents:"",quantity:"",condition:"Good",notes:"",photo:""}));
-function save(){localStorage.setItem(KEY,JSON.stringify(totes))}
-function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function render(){
- let q=document.getElementById("search").value.toLowerCase(), p=new URLSearchParams(location.search).get("tote");
- let a=totes.filter(x=>(!p||x.id.toLowerCase()==p.toLowerCase())&&(!q||JSON.stringify(x).toLowerCase().includes(q)));
- document.getElementById("list").innerHTML=a.map(card).join("")||"<div class=card>No totes found.</div>";
+const KEY="toteInventoryV3";
+const OLDKEY="toteInventoryV2";
+const DBNAME="ToteInventoryDB";
+const STORE="inventory";
+let totes=[];
+function starter(){return Array.from({length:20},(_,i)=>({id:"T-"+String(i+1).padStart(3,"0"),rack:"Rack A",position:i+1,category:"",contents:"",quantity:"",condition:"Good",notes:"",photo:""}));}
+function clone(a){return JSON.parse(JSON.stringify(a));}
+function normalize(a){if(!Array.isArray(a))return starter();return a.filter(x=>x&&x.id).map((x,i)=>({...x,rack:x.rack||"Rack A",position:x.position||i+1,category:x.category||"",contents:x.contents||"",quantity:x.quantity??"",condition:x.condition||"Good",notes:x.notes||"",photo:x.photo||""}));}
+function save(){localStorage.setItem(KEY,JSON.stringify(totes)); try{let r=indexedDB.open(DBNAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:"id"})};r.onsuccess=()=>{let db=r.result,tx=db.transaction(STORE,"readwrite"),s=tx.objectStore(STORE);s.clear();totes.forEach(x=>s.put(x));tx.oncomplete=()=>db.close()};}catch(e){} }
+function loadIDB(){return new Promise(resolve=>{try{let r=indexedDB.open(DBNAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:"id"})};r.onsuccess=()=>{let db=r.result,tx=db.transaction(STORE,"readonly"),s=tx.objectStore(STORE),q=s.getAll();q.onsuccess=()=>{let a=q.result||[];db.close();resolve(a)};q.onerror=()=>{db.close();resolve([])}};r.onerror=()=>resolve([])}catch(e){resolve([])}});}
+async function init(){
+ let raw=localStorage.getItem(KEY);
+ if(raw){try{totes=normalize(JSON.parse(raw))}catch(e){totes=starter()}}
+ else {let old=localStorage.getItem(OLDKEY);if(old){try{totes=normalize(JSON.parse(old))}catch(e){totes=starter()}}else totes=starter();save();}
+ let dbData=await loadIDB();
+ if(dbData.length){totes=normalize(dbData);localStorage.setItem(KEY,JSON.stringify(totes));}
+ render();
 }
-function card(x){return `<section class="card" id="${x.id}"><h2>${x.id}</h2><div class=muted>${x.rack} · Position ${x.position}</div>
-<div class=grid><div><label>Category</label><input data-id="${x.id}" data-k=category value="${esc(x.category)}"></div>
-<div><label>Quantity</label><input data-id="${x.id}" data-k=quantity value="${esc(x.quantity)}"></div>
-<div class=full><label>Contents / Items</label><textarea data-id="${x.id}" data-k=contents placeholder="Christmas lights, extension cords...">${esc(x.contents)}</textarea></div>
-<div><label>Condition</label><select data-id="${x.id}" data-k=condition>${["Good","Fair","Poor","Needs repair"].map(v=>`<option ${x.condition==v?"selected":""}>${v}</option>`).join("")}</select></div>
-<div><label>Photo</label><input type=file accept="image/*" capture=environment onchange="photo(event,'${x.id}')">${x.photo?`<img class=photo src="${x.photo}">`:""}</div>
-<div class=full><label>Notes</label><textarea data-id="${x.id}" data-k=notes>${esc(x.notes)}</textarea></div></div>
-<div class=actions><button class=primary onclick="saveTote('${x.id}')">Save ${x.id}</button><button onclick="copyId('${x.id}')">Copy ID</button><button onclick="qr('${x.id}')">QR Link</button><button onclick="share('${x.id}')">Share</button></div><div class=status id="s-${x.id}"></div></section>`}
-function saveTote(id){let x=totes.find(t=>t.id==id);document.querySelectorAll('[data-id="'+id+'"]').forEach(e=>x[e.dataset.k]=e.value);save();document.getElementById("s-"+id).textContent="Saved ✓"}
-function copyId(id){navigator.clipboard?.writeText(id)}
-function qr(id){let u=location.origin+location.pathname+"?tote="+id;navigator.clipboard?.writeText(u);alert("QR/link for "+id+"\n\n"+u)}
-async function share(id){let u=location.origin+location.pathname+"?tote="+id;if(navigator.share)await navigator.share({title:id,url:u});else navigator.clipboard?.writeText(u)}
-function photo(e,id){let r=new FileReader();r.onload=()=>{totes.find(t=>t.id==id).photo=r.result;save();render()};r.readAsDataURL(e.target.files[0])}
-function backup(){save();let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(totes,null,2)],{type:"application/json"}));a.download="tote-inventory-backup.json";a.click()}
-function restore(e){let r=new FileReader();r.onload=()=>{try{totes=JSON.parse(r.result);save();render()}catch(_){alert("Invalid backup")}};r.readAsText(e.target.files[0])}
-function newTote(){let n=totes.length+1;totes.push({id:"T-"+String(n).padStart(3,"0"),rack:"Rack A",position:n,category:"",contents:"",quantity:"",condition:"Good",notes:"",photo:""});save();render()}
-function showAll(){history.replaceState(null,"",location.pathname);render()}function clearSearch(){document.getElementById("search").value="";render()}
-render();
-</script></body></html>
+function esc(s){return String(s??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+function render(){let q=(document.getElementById("search")?.value||"").toLowerCase().trim();let p=new URLSearchParams(location.search).get("tote");let a=totes.filter(x=>(!p||x.id.toLowerCase()===p.toLowerCase())&&(!q||JSON.stringify(x).toLowerCase().includes(q)));document.getElementById("count").textContent=totes.length+" totes";document.getElementById("list").innerHTML=a.map(card).join("")||'<div class="card empty">No totes found.</div>';}
+function card(x){return `<section class="card" id="${esc(x.id)}"><h2>${esc(x.id)}</h2><div class="muted">${esc(x.rack)} · Position ${esc(x.position)}</div><div class="grid"><div><label>Category</label><input data-id="${esc(x.id)}" data-k="category" value="${esc(x.category)}"></div><div><label>Quantity</label><input data-id="${esc(x.id)}" data-k="quantity" value="${esc(x.quantity)}"></div><div class="full"><label>Contents / Items</label><textarea data-id="${esc(x.id)}" data-k="contents" placeholder="Christmas lights, extension cords...">${esc(x.contents)}</textarea></div><div><label>Condition</label><select data-id="${esc(x.id)}" data-k="condition">${["Good","Fair","Poor","Needs repair"].map(v=>`<option ${x.condition===v?"selected":""}>${v}</option>`).join("")}</select></div><div><label>Photo</label><input type="file" accept="image/*" capture="environment" onchange="photo(event,'${esc(x.id)}')">${x.photo?`<img class="photo" src="${x.photo}" alt="${esc(x.id)} photo">`:""}</div><div class="full"><label>Notes</label><textarea data-id="${esc(x.id)}" data-k="notes">${esc(x.notes)}</textarea></div></div><div class="actions"><button class="primary" onclick="saveTote('${esc(x.id)}')">Save ${esc(x.id)}</button><button onclick="copyId('${esc(x.id)}')">Copy ID</button><button onclick="qr('${esc(x.id)}')">QR Link</button><button onclick="share('${esc(x.id)}')">Share</button></div><div class="status" id="s-${esc(x.id)}"></div></section>`}
+function saveTote(id){let x=totes.find(t=>t.id===id);if(!x)return;document.querySelectorAll('[data-id="'+CSS.escape(id)+'"]').forEach(e=>x[e.dataset.k]=e.value);save();document.getElementById("s-"+id).textContent="Saved ✓";}
+async function copyId(id){try{await navigator.clipboard.writeText(id);alert(id+" copied")}catch(e){alert(id)}}
+function qr(id){let u=location.origin+location.pathname+"?tote="+encodeURIComponent(id);try{navigator.clipboard.writeText(u)}catch(e){}alert("QR/link for "+id+"\n\n"+u)}
+async function share(id){let u=location.origin+location.pathname+"?tote="+encodeURIComponent(id);if(navigator.share){try{await navigator.share({title:id,url:u})}catch(e){}}else{try{await navigator.clipboard.writeText(u);alert("Link copied")}catch(e){alert(u)}}}
+function photo(e,id){let f=e.target.files?.[0];if(!f)return;let r=new FileReader();r.onload=()=>{let x=totes.find(t=>t.id===id);if(x){x.photo=r.result;save();render()}};r.readAsDataURL(f)}
+function backup(){save();let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(totes,null,2)],{type:"application/json"}));a.download="tote-inventory-backup.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function restore(e){let f=e.target.files?.[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let a=normalize(JSON.parse(r.result));if(!a.length)throw Error();totes=a;save();history.replaceState(null,"",location.pathname);render();alert("Backup restored ✓")}catch(_){alert("Invalid backup file")}};r.readAsText(f)}
+function newTote(){let max=totes.reduce((m,x)=>{let n=Number(String(x.id).match(/(\d+)$/)?.[1]||0);return Math.max(m,n)},0);let n=max+1;let id="T-"+String(n).padStart(3,"0");totes.push({id,rack:"Rack A",position:n,category:"",contents:"",quantity:"",condition:"Good",notes:"",photo:""});save();history.replaceState(null,"",location.pathname+"?tote="+encodeURIComponent(id));render();setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"}),50)}
+function showAll(){history.replaceState(null,"",location.pathname);document.getElementById("search").value="";render();window.scrollTo({top:0,behavior:"smooth"})}
+function clearSearch(){document.getElementById("search").value="";render()}
+init();
+</script>
+</body></html>
