@@ -4,450 +4,80 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
-<title>Tote Inventory v7</title>
+<title>Tote Inventory v8</title>
 <style>
-:root{--bg:#f3f4f6;--ink:#111827;--muted:#64748b;--line:#cbd5e1;--blue:#2563eb;--green:#16a34a;--red:#dc2626}
-*{box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+:root{--bg:#f3f4f6;--ink:#111827;--muted:#64748b;--line:#cbd5e1;--blue:#2563eb;--green:#16a34a}
+*{box-sizing:border-box} body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:var(--bg);color:var(--ink)}
 header{background:#111827;color:#fff;padding:16px 14px 14px;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px #0003}
-h1{font-size:25px;margin:0 0 12px}
-.bar{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+h1{font-size:25px;margin:0 0 12px}.bar{display:grid;grid-template-columns:1fr auto auto;gap:8px}
 button,.filebtn{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:700;background:#fff;color:var(--ink);min-height:46px}
-button:active,.filebtn:active{transform:scale(.98)}
-button.primary{background:var(--green);color:#fff}
-button.blue{background:var(--blue);color:#fff}
-button.danger{background:#fee2e2;color:#991b1b}
+button:active,.filebtn:active{transform:scale(.98)} button.primary{background:var(--green);color:#fff} button.blue{background:var(--blue);color:#fff}
 input,textarea,select{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;font:inherit;background:#fff;color:var(--ink)}
-textarea{min-height:100px;resize:vertical}
-main{max-width:850px;margin:auto;padding:14px}
-.card{background:#fff;border-radius:18px;padding:17px;margin:12px 0;box-shadow:0 2px 10px #0000000d}
-.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.tools>*{flex:0 0 auto}
-.notice{background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:13px;margin:12px 0;color:#1e3a8a}
-.stats{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-weight:650;margin-top:10px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.full{grid-column:1/-1}
-label{display:block;font-weight:750;margin:5px 0 6px}
-h2{font-size:28px;margin:0 0 5px}
-.muted{color:var(--muted)}
-.status{color:#166534;font-weight:700;min-height:20px;margin-top:7px}
-.photo{display:block;max-width:100%;width:auto;max-height:260px;border-radius:12px;margin-top:10px;border:1px solid #e2e8f0}
-.photo-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.tote-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.badge{display:inline-block;background:#e2e8f0;border-radius:999px;padding:5px 9px;font-size:13px;font-weight:700;color:#334155}
-.scanner{background:#0b1220;color:#fff;border-radius:16px;padding:12px;margin-top:10px}
-#reader{width:100%;max-width:500px;margin:auto}
+textarea{min-height:100px;resize:vertical} main{max-width:850px;margin:auto;padding:14px}.card{background:#fff;border-radius:18px;padding:17px;margin:12px 0;box-shadow:0 2px 10px #0000000d}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.tools>*{flex:0 0 auto}.notice{background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:13px;margin:12px 0;color:#1e3a8a}
+.stats{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-weight:650;margin-top:10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}
+label{display:block;font-weight:750;margin:5px 0 6px}h2{font-size:28px;margin:0 0 5px}.muted{color:var(--muted)}.status{color:#166534;font-weight:700;min-height:20px;margin-top:7px}
+.photo{display:block;max-width:100%;width:auto;max-height:260px;border-radius:12px;margin-top:10px;border:1px solid #e2e8f0}.photo-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tote-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.badge{display:inline-block;background:#e2e8f0;border-radius:999px;padding:5px 9px;font-size:13px;font-weight:700;color:#334155}
+.scanner{background:#0b1220;color:#fff;border-radius:16px;padding:12px;margin-top:10px}#reader{width:100%;max-width:500px;margin:auto}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111;color:#fff;padding:12px 17px;border-radius:999px;display:none;z-index:100;box-shadow:0 4px 18px #0004;white-space:nowrap}
-.empty{text-align:center;color:var(--muted);padding:30px 10px}
-.small{font-size:13px}
-.filebtn{display:inline-flex;align-items:center;cursor:pointer}
-.filebtn input{display:none}
-@media(max-width:620px){
- .bar{grid-template-columns:1fr 1fr}
- .bar input{grid-column:1/-1}
- .grid{grid-template-columns:1fr}
- .full{grid-column:auto}
-}
-</style>
-</head>
+.empty{text-align:center;color:var(--muted);padding:30px 10px}.small{font-size:13px}.filebtn{display:inline-flex;align-items:center;cursor:pointer}.filebtn input{display:none}
+@media(max-width:620px){.bar{grid-template-columns:1fr 1fr}.bar input{grid-column:1/-1}.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style></head>
 <body>
-<header>
-  <h1>📦 Tote Inventory v7</h1>
-  <div class="bar">
-    <input id="search" placeholder="Search tote, item, category..." oninput="render()">
-    <button onclick="showAll()">All Totes</button>
-    <button class="blue" onclick="startScan()">📷 Scan QR / Barcode</button>
-  </div>
-  <div id="scannerBox" class="scanner" style="display:none">
-    <div id="reader"></div>
-    <button onclick="stopScan()" style="margin-top:10px">Close Scanner</button><div class="small" style="margin-top:8px;color:#cbd5e1">Scans QR codes and common barcodes (Code 128, Code 39, EAN, UPC, ITF). Point your rear camera at the tote label.</div>
-  </div>
-</header>
+<header><h1>📦 Tote Inventory v8</h1><div class="bar">
+<input id="search" placeholder="Search tote, item, category..." oninput="render()">
+<button onclick="showAll()">All Totes</button><button class="blue" onclick="startScan()">📷 Scan QR / Barcode</button>
+</div><div id="scannerBox" class="scanner" style="display:none"><div id="reader"></div>
+<button onclick="stopScan()" style="margin-top:10px">Close Scanner</button><div class="small" style="margin-top:8px;color:#cbd5e1">Scans QR codes and common barcodes. Point your rear camera at the tote label.</div></div></header>
+<main><section class="card"><div class="tools">
+<button class="primary" onclick="backup()">⬇️ Backup</button>
+<label class="filebtn">⬆️ Restore<input type="file" accept=".json,application/json" onchange="restore(event)"></label>
+<button onclick="addTote()">➕ New Tote</button><button onclick="printLabels()">🏷️ Print QR Labels</button>
+</div><div class="stats"><span id="count">0 totes</span><span>•</span><span>IndexedDB storage</span></div>
+<div class="notice"><b>V8:</b> QR + barcode scanning, photos, easier editing, persistent IndexedDB storage, backup/restore, and printable QR labels.
+<div class="small" style="margin-top:5px">Use normal Safari browsing, not Private Browsing, for permanent local storage.</div></div></section><div id="app"></div></main><div id="toast"></div>
+<script src="https://unpkg.com/html5-qrcode" defer></script><script>
+const DB="ToteInventoryV4", STORE="totes"; let db=null,scanner=null;
+const def=n=>({id:"T-"+String(n).padStart(3,"0"),rack:"Rack A",position:n,category:"",contents:"",quantity:"",condition:"Good",notes:"",photo:""});
+function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:"id"})};r.onsuccess=()=>{db=r.result;resolve()};r.onerror=()=>reject(r.error)})}
+function req(mode,method,...args){return new Promise((resolve,reject)=>{const r=db.transaction(STORE,mode).objectStore(STORE)[method](...args);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+const all=()=>req("readonly","getAll"),get=id=>req("readonly","get",id),put=x=>req("readwrite","put",x);
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))} function escAttr(s){return esc(s).replace(/'/g,"&#39;")}
+function sortTotes(a){return a.sort((x,y)=>x.id.localeCompare(y.id,undefined,{numeric:true}))}
+function normalizeToteId(value){let s=String(value||"").trim();for(let i=0;i<4;i++){try{const u=new URL(s,location.href),q=u.searchParams.get("tote");if(q){s=q;continue}const h=(u.hash||"").replace(/^#/,"").trim();if(h){s=h;continue}const m=u.pathname.match(/(?:^|\/)(T[- ]?\d{1,4})\/?$/i);if(m){s=m[1];continue}}catch(e){}break}s=s.replace(/^#+/,"").trim().replace(/^\/+/,"").trim();const match=s.match(/(?:^|[#/?&=])(T[- _]?\d{1,4})(?:$|[/?&#])/i);if(match)s=match[1];s=s.trim().toUpperCase().replace(/^T[ _]?(\d{1,4})$/,'T-$1');if(/^\d{1,4}$/.test(s))s='T-'+s.padStart(3,'0');const m=s.match(/^T-(\d{1,4})$/);if(m)s='T-'+m[1].padStart(3,'0');return s}
+async function init(){await openDB();const a=await all();if(!a.length){for(let i=1;i<=20;i++)await put(def(i))}route()}
+function route(){const id=new URLSearchParams(location.search).get("tote");if(id)get(normalizeToteId(id)).then(x=>x?openTote(x):render());else{const hashId=location.hash?normalizeToteId(location.hash):"";if(hashId&&/^T-\d{3,4}$/.test(hashId))get(hashId).then(x=>x?openTote(x):render());else render()}}
+async function render(){const q=document.getElementById("search").value.trim().toLowerCase();let a=sortTotes(await all()),total=a.length;if(q)a=a.filter(x=>JSON.stringify(x).toLowerCase().includes(q));document.getElementById("count").textContent=q?`${a.length} of ${total} totes`:`${total} totes`;document.getElementById("app").innerHTML=a.length?a.map(card).join(""):'<section class="card empty">No totes match your search.</section>'}
+function card(x){const conditions=["Good","Fair","Poor","Needs repair"];return `<section class="card" id="card-${escAttr(x.id)}"><div class="tote-head"><div><h2>${esc(x.id)}</h2><div class="muted">${esc(x.rack)} · Position ${esc(x.position)}</div></div><span class="badge">${esc(x.condition||"Good")}</span></div><div class="grid" style="margin-top:14px"><div><label>Category</label><input id="${x.id}c" value="${escAttr(x.category)}" placeholder="Christmas, tools, kitchen..."></div><div><label>Quantity</label><input id="${x.id}q" value="${escAttr(x.quantity)}" inputmode="numeric" placeholder="e.g. 12"></div><div class="full"><label>Contents / Items</label><textarea id="${x.id}i" placeholder="List the contents of this tote...">${esc(x.contents)}</textarea></div><div><label>Condition</label><select id="${x.id}d">${conditions.map(v=>`<option ${v===(x.condition||"Good")?"selected":""}>${v}</option>`).join("")}</select></div><div><label>Photo</label><input type="file" accept="image/*" capture="environment" onchange="photo(event,'${escAttr(x.id)}')">${x.photo?`<img class="photo" src="${x.photo}" alt="Photo of ${escAttr(x.id)}"><div class="photo-actions"><button onclick="removePhoto('${escAttr(x.id)}')">Remove Photo</button></div>`:''}</div><div class="full"><label>Notes</label><textarea id="${x.id}n" placeholder="Location details, special notes...">${esc(x.notes)}</textarea></div></div><div class="tools" style="margin-top:12px"><button class="primary" onclick="saveTote('${escAttr(x.id)}')">💾 Save</button><button onclick="openToteById('${escAttr(x.id)}')">Open</button><button onclick="copyLink('${escAttr(x.id)}')">🔗 Copy QR Link</button></div><div class="status" id="s${escAttr(x.id)}"></div></section>`}
+async function saveTote(id){const x=await get(id);if(!x)return;x.category=document.getElementById(id+"c").value;x.quantity=document.getElementById(id+"q").value;x.contents=document.getElementById(id+"i").value;x.condition=document.getElementById(id+"d").value;x.notes=document.getElementById(id+"n").value;await put(x);const s=document.getElementById("s"+id);if(s)s.textContent="Saved ✓";toast(id+" saved")}
+async function openToteById(id){const x=await get(id);if(x)openTote(x)}
+function openTote(x){history.replaceState(null,"",location.pathname+"?tote="+encodeURIComponent(x.id));document.getElementById("search").value="";document.getElementById("count").textContent="1 tote";document.getElementById("app").innerHTML=card(x)+`<section class="card"><button onclick="showAll()">← All Totes</button></section>`;window.scrollTo({top:0,behavior:"smooth"})}
+function showAll(){history.replaceState(null,"",location.pathname);document.getElementById("search").value="";render();window.scrollTo({top:0,behavior:"smooth"})}
+async function addTote(){const a=await all(),n=a.reduce((m,x)=>Math.max(m,parseInt(String(x.id).replace(/\D/g,""))||0),0)+1,x=def(n);await put(x);openTote(x);toast(x.id+" created")}
+async function photo(e,id){const f=e.target.files&&e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=async()=>{const x=await get(id);if(!x)return;x.photo=reader.result;await put(x);openTote(x);toast("Photo saved")};reader.readAsDataURL(f)}
+async function removePhoto(id){const x=await get(id);if(!x)return;x.photo="";await put(x);openTote(x);toast("Photo removed")}
+async function copyLink(id){const u=location.origin+location.pathname+"?tote="+encodeURIComponent(id);try{await navigator.clipboard.writeText(u);toast("QR link copied")}catch(e){prompt("Copy this QR link:",u)}}
+async function backup(){const a=sortTotes(await all()),payload={version:8,createdAt:new Date().toISOString(),totes:a},blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),aTag=document.createElement("a");aTag.href=url;aTag.download="tote-inventory-v8-backup.json";document.body.appendChild(aTag);aTag.click();aTag.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("V8 backup created")}
+function restore(e){const file=e.target.files&&e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result),incoming=Array.isArray(data)?data:(data.totes||[]);if(!Array.isArray(incoming))throw new Error();let count=0;for(const t of incoming){if(!t||!t.id)continue;await put({...def(parseInt(String(t.id).replace(/\D/g,""))||1),...t,id:String(t.id).toUpperCase()});count++}render();toast(`${count} totes restored`)}catch(err){alert("Invalid backup file.")}finally{e.target.value=""}};reader.readAsText(file)}
+async function startScan(){const box=document.getElementById("scannerBox");box.style.display="block";document.getElementById("reader").innerHTML="";if(typeof Html5Qrcode==="undefined"){document.getElementById("reader").innerHTML="<p>Scanner library is still loading. Wait a moment and tap Scan QR again.</p>";return}try{scanner=new Html5Qrcode("reader");const formats=[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.ITF,Html5QrcodeSupportedFormats.DATA_MATRIX].filter(v=>v!==undefined);await scanner.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250},formatsToSupport:formats},async text=>{const id=normalizeToteId(text),x=await get(id);if(x){stopScan();openTote(x);toast(id+" opened")}else{stopScan();alert("Tote not found: "+text+"\n\nRead as: "+id)}})}catch(err){document.getElementById("reader").innerHTML="<p>Camera access was unavailable. Check Safari camera permission for this site.</p>"}}
+function stopScan(){if(scanner){scanner.stop().catch(()=>{}).finally(()=>{scanner=null})}document.getElementById("scannerBox").style.display="none"}
+function toast(message){const x=document.getElementById("toast");x.textContent=message;x.style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.style.display="none",1800)}
 
-<main>
-  <section class="card">
-    <div class="tools">
-      <button class="primary" onclick="backup()">⬇️ Backup</button>
-      <label class="filebtn">⬆️ Restore<input type="file" accept=".json,application/json" onchange="restore(event)"></label>
-      <button onclick="addTote()">➕ New Tote</button>
-    </div>
-    <div class="stats">
-      <span id="count">0 totes</span>
-      <span>•</span>
-      <span>IndexedDB storage</span>
-    </div>
-    <div class="notice">
-      <b>V7:</b> QR + barcode scanning, photos, easier editing, persistent IndexedDB storage, and backup/restore.
-      <div class="small" style="margin-top:5px">Use normal Safari browsing, not Private Browsing, for permanent local storage.</div>
-    </div>
-  </section>
-  <div id="app"></div>
-</main>
-
-<div id="toast"></div>
-
-<script src="https://unpkg.com/html5-qrcode" defer></script>
-<script>
-const DB="ToteInventoryV4", STORE="totes";
-let db=null, scanner=null;
-
-const def=n=>({
-  id:"T-"+String(n).padStart(3,"0"),
-  rack:"Rack A",
-  position:n,
-  category:"",
-  contents:"",
-  quantity:"",
-  condition:"Good",
-  notes:"",
-  photo:""
-});
-
-function openDB(){
-  return new Promise((resolve,reject)=>{
-    const r=indexedDB.open(DB,1);
-    r.onupgradeneeded=()=>{ if(!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE,{keyPath:"id"}); };
-    r.onsuccess=()=>{db=r.result;resolve()};
-    r.onerror=()=>reject(r.error);
-  });
+async function printLabels(){
+  const totes=sortTotes(await all());
+  if(!totes.length){toast("No totes to print");return}
+  const w=window.open("","_blank");
+  if(!w){alert("Safari blocked the label window. Allow pop-ups for this site, then try again.");return}
+  const base=location.origin+location.pathname;
+  const labels=totes.map(x=>{
+    const url=base+"?tote="+encodeURIComponent(x.id);
+    const qr="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(url);
+    return `<div class="label"><img src="${qr}" alt="QR ${escAttr(x.id)}"><div class="id">${esc(x.id)}</div><div class="sub">Tote Inventory</div></div>`;
+  }).join("");
+  w.document.write(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tote Inventory QR Labels</title><style>@page{size:letter;margin:.35in}*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.sheet{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.label{height:2.35in;border:1px dashed #999;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7px;page-break-inside:avoid}.label img{width:1.45in;height:1.45in}.id{font-size:22px;font-weight:800;margin-top:4px}.sub{font-size:10px;color:#555;margin-top:1px}</style></head><body><div class="sheet">${labels}</div><script>window.addEventListener("load",()=>setTimeout(()=>window.print(),800));<\/script></body></html>`);
+  w.document.close();
+  toast(`${totes.length} QR labels prepared`);
 }
-function req(mode,method,...args){
-  return new Promise((resolve,reject)=>{
-    const r=db.transaction(STORE,mode).objectStore(STORE)[method](...args);
-    r.onsuccess=()=>resolve(r.result);
-    r.onerror=()=>reject(r.error);
-  });
-}
-const all=()=>req("readonly","getAll");
-const get=id=>req("readonly","get",id);
-const put=x=>req("readwrite","put",x);
-
-function esc(s){
-  return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-}
-function escAttr(s){return esc(s).replace(/'/g,"&#39;")}
-
-function sortTotes(a){
-  return a.sort((x,y)=>x.id.localeCompare(y.id,undefined,{numeric:true}));
-}
-
-/*
- V7 QR FIX:
- Accept all of these forms:
-   T-001
-   001
-   https://.../?tote=T-001
-   https://.../#T-001
-   https://.../#/T-001
-   https://.../#https://.../#T-001
- The last forms are useful for QR labels created by earlier versions.
-*/
-function normalizeToteId(value){
-  let s=String(value||"").trim();
-
-  // Repeatedly unwrap URLs/fragments so older QR labels continue to work.
-  for(let i=0;i<4;i++){
-    try{
-      const u=new URL(s, location.href);
-
-      const q=u.searchParams.get("tote");
-      if(q){
-        s=q;
-        continue;
-      }
-
-      const h=(u.hash||"").replace(/^#/,"").trim();
-      if(h){
-        s=h;
-        continue;
-      }
-
-      const m=u.pathname.match(/(?:^|\/)(T[- ]?\d{1,4})\/?$/i);
-      if(m){
-        s=m[1];
-        continue;
-      }
-    }catch(e){}
-    break;
-  }
-
-  // Handle a raw fragment such as #T-001 or #/T-001.
-  s=s.replace(/^#+/,"").trim().replace(/^\/+/,"").trim();
-
-  // If the remaining value is still a URL-like string, take its final tote token.
-  const match=s.match(/(?:^|[#/?&=])(T[- _]?\d{1,4})(?:$|[/?&#])/i);
-  if(match) s=match[1];
-
-  s=s.trim().toUpperCase().replace(/^T[ _]?(\d{1,4})$/,'T-$1');
-
-  if(/^\d{1,4}$/.test(s)) s='T-'+s.padStart(3,'0');
-
-  const m=s.match(/^T-(\d{1,4})$/);
-  if(m) s='T-'+m[1].padStart(3,'0');
-
-  return s;
-}
-
-async function init(){
-  await openDB();
-  const a=await all();
-  if(!a.length){
-    for(let i=1;i<=20;i++) await put(def(i));
-  }
-  route();
-}
-
-function route(){
-  const id=new URLSearchParams(location.search).get("tote");
-  if(id) get(normalizeToteId(id)).then(x=>x?openTote(x):render());
-  else {
-    const hashId=location.hash ? normalizeToteId(location.hash) : "";
-    if(hashId && /^T-\d{3,4}$/.test(hashId)){
-      get(hashId).then(x=>x?openTote(x):render());
-    }else render();
-  }
-}
-
-async function render(){
-  const q=document.getElementById("search").value.trim().toLowerCase();
-  let a=sortTotes(await all());
-  const total=a.length;
-  if(q) a=a.filter(x=>JSON.stringify(x).toLowerCase().includes(q));
-  document.getElementById("count").textContent =
-    q ? `${a.length} of ${total} totes` : `${total} totes`;
-  document.getElementById("app").innerHTML=a.length?a.map(card).join(""):'<section class="card empty">No totes match your search.</section>';
-}
-
-function card(x){
-  const conditions=["Good","Fair","Poor","Needs repair"];
-  return `<section class="card" id="card-${escAttr(x.id)}">
-    <div class="tote-head">
-      <div>
-        <h2>${esc(x.id)}</h2>
-        <div class="muted">${esc(x.rack)} · Position ${esc(x.position)}</div>
-      </div>
-      <span class="badge">${esc(x.condition||"Good")}</span>
-    </div>
-    <div class="grid" style="margin-top:14px">
-      <div>
-        <label>Category</label>
-        <input id="${x.id}c" value="${escAttr(x.category)}" placeholder="Christmas, tools, kitchen...">
-      </div>
-      <div>
-        <label>Quantity</label>
-        <input id="${x.id}q" value="${escAttr(x.quantity)}" inputmode="numeric" placeholder="e.g. 12">
-      </div>
-      <div class="full">
-        <label>Contents / Items</label>
-        <textarea id="${x.id}i" placeholder="List the contents of this tote...">${esc(x.contents)}</textarea>
-      </div>
-      <div>
-        <label>Condition</label>
-        <select id="${x.id}d">${conditions.map(v=>`<option ${v===(x.condition||"Good")?"selected":""}>${v}</option>`).join("")}</select>
-      </div>
-      <div>
-        <label>Photo</label>
-        <input type="file" accept="image/*" capture="environment" onchange="photo(event,'${escAttr(x.id)}')">
-        ${x.photo?`<img class="photo" src="${x.photo}" alt="Photo of ${escAttr(x.id)}">
-        <div class="photo-actions"><button onclick="removePhoto('${escAttr(x.id)}')">Remove Photo</button></div>`:''}
-      </div>
-      <div class="full">
-        <label>Notes</label>
-        <textarea id="${x.id}n" placeholder="Location details, special notes...">${esc(x.notes)}</textarea>
-      </div>
-    </div>
-    <div class="tools" style="margin-top:12px">
-      <button class="primary" onclick="saveTote('${escAttr(x.id)}')">💾 Save</button>
-      <button onclick="openToteById('${escAttr(x.id)}')">Open</button>
-      <button onclick="copyLink('${escAttr(x.id)}')">🔗 Copy QR Link</button>
-    </div>
-    <div class="status" id="s${escAttr(x.id)}"></div>
-  </section>`;
-}
-
-async function saveTote(id){
-  const x=await get(id);
-  if(!x)return;
-  x.category=document.getElementById(id+"c").value;
-  x.quantity=document.getElementById(id+"q").value;
-  x.contents=document.getElementById(id+"i").value;
-  x.condition=document.getElementById(id+"d").value;
-  x.notes=document.getElementById(id+"n").value;
-  await put(x);
-  const s=document.getElementById("s"+id);
-  if(s)s.textContent="Saved ✓";
-  toast(id+" saved");
-}
-
-async function openToteById(id){
-  const x=await get(id);
-  if(x) openTote(x);
-}
-
-function openTote(x){
-  history.replaceState(null,"",location.pathname+"?tote="+encodeURIComponent(x.id));
-  document.getElementById("search").value="";
-  document.getElementById("count").textContent="1 tote";
-  document.getElementById("app").innerHTML=card(x)+
-    `<section class="card"><button onclick="showAll()">← All Totes</button></section>`;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function showAll(){
-  history.replaceState(null,"",location.pathname);
-  document.getElementById("search").value="";
-  render();
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-async function addTote(){
-  const a=await all();
-  const n=a.reduce((m,x)=>Math.max(m,parseInt(String(x.id).replace(/\D/g,""))||0),0)+1;
-  const x=def(n);
-  await put(x);
-  openTote(x);
-  toast(x.id+" created");
-}
-
-async function photo(e,id){
-  const f=e.target.files&&e.target.files[0];
-  if(!f)return;
-  const reader=new FileReader();
-  reader.onload=async()=>{
-    const x=await get(id);
-    if(!x)return;
-    x.photo=reader.result;
-    await put(x);
-    openTote(x);
-    toast("Photo saved");
-  };
-  reader.readAsDataURL(f);
-}
-
-async function removePhoto(id){
-  const x=await get(id);
-  if(!x)return;
-  x.photo="";
-  await put(x);
-  openTote(x);
-  toast("Photo removed");
-}
-
-async function copyLink(id){
-  const u=location.origin+location.pathname+"?tote="+encodeURIComponent(id);
-  try{
-    await navigator.clipboard.writeText(u);
-    toast("QR link copied");
-  }catch(e){
-    prompt("Copy this QR link:",u);
-  }
-}
-
-async function backup(){
-  const a=sortTotes(await all());
-  const payload={version:7,createdAt:new Date().toISOString(),totes:a};
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const aTag=document.createElement("a");
-  aTag.href=url;
-  aTag.download="tote-inventory-v7-backup.json";
-  document.body.appendChild(aTag);
-  aTag.click();
-  aTag.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-  toast("V7 backup created");
-}
-
-function restore(e){
-  const file=e.target.files&&e.target.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=async()=>{
-    try{
-      const data=JSON.parse(reader.result);
-      const incoming=Array.isArray(data)?data:(data.totes||[]);
-      if(!Array.isArray(incoming))throw new Error("Invalid backup");
-      let count=0;
-      for(const t of incoming){
-        if(!t || !t.id)continue;
-        await put({
-          ...def(parseInt(String(t.id).replace(/\D/g,""))||1),
-          ...t,
-          id:String(t.id).toUpperCase()
-        });
-        count++;
-      }
-      render();
-      toast(`${count} totes restored`);
-    }catch(err){
-      alert("Invalid backup file.");
-    }finally{
-      e.target.value="";
-    }
-  };
-  reader.readAsText(file);
-}
-
-async function startScan(){
-  const box=document.getElementById("scannerBox");
-  box.style.display="block";
-  document.getElementById("reader").innerHTML="";
-  if(typeof Html5Qrcode==="undefined"){
-    document.getElementById("reader").innerHTML="<p>Scanner library is still loading. Wait a moment and tap Scan QR again.</p>";
-    return;
-  }
-  try{
-    scanner=new Html5Qrcode("reader");
-    const formats = [
-      Html5QrcodeSupportedFormats.QR_CODE,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39,
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A,
-      Html5QrcodeSupportedFormats.UPC_E,
-      Html5QrcodeSupportedFormats.ITF,
-      Html5QrcodeSupportedFormats.DATA_MATRIX
-    ].filter(v=>v!==undefined);
-    await scanner.start(
-      {facingMode:"environment"},
-      {fps:10,qrbox:{width:250,height:250},formatsToSupport:formats},
-      async text=>{
-        const id=normalizeToteId(text);
-        const x=await get(id);
-        if(x){
-          stopScan();
-          openTote(x);
-          toast(id+" opened");
-        }else{
-          stopScan();
-          alert("Tote not found: "+text+"\n\nRead as: "+id);
-        }
-      }
-    );
-  }catch(err){
-    document.getElementById("reader").innerHTML="<p>Camera access was unavailable. Check Safari camera permission for this site.</p>";
-  }
-}
-
-function stopScan(){
-  if(scanner){
-    scanner.stop().catch(()=>{}).finally(()=>{scanner=null});
-  }
-  document.getElementById("scannerBox").style.display="none";
-}
-
-function toast(message){
-  const x=document.getElementById("toast");
-  x.textContent=message;
-  x.style.display="block";
-  clearTimeout(window.__toast);
-  window.__toast=setTimeout(()=>x.style.display="none",1800);
-}
-
-init().catch(()=>{
-  document.getElementById("app").innerHTML='<section class="card"><b>IndexedDB could not be opened.</b><p>Make sure this page is not being used in Safari Private Browsing.</p></section>';
-});
-</script>
-</body>
-</html>
+init().catch(()=>{document.getElementById("app").innerHTML='<section class="card"><b>IndexedDB could not be opened.</b><p>Make sure this page is not being used in Safari Private Browsing.</p></section>'});
+</script></body></html>
