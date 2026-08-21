@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
-<title>Tote Inventory v8</title>
+<title>Tote Inventory v9</title>
 <style>
 :root{--bg:#f3f4f6;--ink:#111827;--muted:#64748b;--line:#cbd5e1;--blue:#2563eb;--green:#16a34a}
 *{box-sizing:border-box} body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:var(--bg);color:var(--ink)}
@@ -22,10 +22,12 @@ label{display:block;font-weight:750;margin:5px 0 6px}h2{font-size:28px;margin:0 
 .scanner{background:#0b1220;color:#fff;border-radius:16px;padding:12px;margin-top:10px}#reader{width:100%;max-width:500px;margin:auto}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111;color:#fff;padding:12px 17px;border-radius:999px;display:none;z-index:100;box-shadow:0 4px 18px #0004;white-space:nowrap}
 .empty{text-align:center;color:var(--muted);padding:30px 10px}.small{font-size:13px}.filebtn{display:inline-flex;align-items:center;cursor:pointer}.filebtn input{display:none}
+
+.label-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;margin:6px 0;background:#fff}.label-row input{width:22px;height:22px;padding:0}.label-name{font-size:18px;font-weight:800}.label-info{color:var(--muted);font-size:13px;margin-left:auto}
 @media(max-width:620px){.bar{grid-template-columns:1fr 1fr}.bar input{grid-column:1/-1}.grid{grid-template-columns:1fr}.full{grid-column:auto}}
 </style></head>
 <body>
-<header><h1>📦 Tote Inventory v8</h1><div class="bar">
+<header><h1>📦 Tote Inventory v9</h1><div class="bar">
 <input id="search" placeholder="Search tote, item, category..." oninput="render()">
 <button onclick="showAll()">All Totes</button><button class="blue" onclick="startScan()">📷 Scan QR / Barcode</button>
 </div><div id="scannerBox" class="scanner" style="display:none"><div id="reader"></div>
@@ -33,10 +35,10 @@ label{display:block;font-weight:750;margin:5px 0 6px}h2{font-size:28px;margin:0 
 <main><section class="card"><div class="tools">
 <button class="primary" onclick="backup()">⬇️ Backup</button>
 <label class="filebtn">⬆️ Restore<input type="file" accept=".json,application/json" onchange="restore(event)"></label>
-<button onclick="addTote()">➕ New Tote</button><button onclick="printLabels()">🏷️ Print QR Labels</button>
+<button onclick="addTote()">➕ New Tote</button><button onclick="openLabelManager()">🏷️ QR Labels</button>
 </div><div class="stats"><span id="count">0 totes</span><span>•</span><span>IndexedDB storage</span></div>
-<div class="notice"><b>V8:</b> QR + barcode scanning, photos, easier editing, persistent IndexedDB storage, backup/restore, and printable QR labels.
-<div class="small" style="margin-top:5px">Use normal Safari browsing, not Private Browsing, for permanent local storage.</div></div></section><div id="app"></div></main><div id="toast"></div>
+<div class="notice"><b>V9:</b> QR + barcode scanning, photos, easier editing, persistent IndexedDB storage, backup/restore, and printable QR labels.
+<div class="small" style="margin-top:5px">Use normal Safari browsing, not Private Browsing, for permanent local storage.</div></div></section><section id="labelManager" class="card" style="display:none"><h2 style="font-size:24px">🏷️ QR Label Manager</h2><p class="muted">Choose which totes to print and the label size.</p><div class="grid"><div><label>Label size</label><select id="labelSize"><option value="small">Small — 2" × 1.5"</option><option value="medium" selected>Medium — 2.35" × 2.35"</option><option value="large">Large — 2.75" × 3.0"</option></select></div><div><label>Quick selection</label><select id="labelPreset" onchange="applyLabelPreset()"><option value="all">All totes</option><option value="first20">T-001 to T-020</option><option value="range">Choose a range</option><option value="none">Clear selection</option></select></div><div><label>From</label><input id="labelFrom" value="T-001" placeholder="T-001"></div><div><label>To</label><input id="labelTo" value="T-020" placeholder="T-020"></div></div><div class="tools" style="margin-top:12px"><button onclick="selectLabelRange()">Select Range</button><button onclick="selectAllLabels()">Select All</button><button onclick="clearLabelSelection()">Clear All</button></div><div id="labelList" style="margin-top:14px"></div><div class="tools" style="margin-top:14px"><button class="primary" onclick="printSelectedLabels()">🖨️ Print Selected Labels</button><button onclick="closeLabelManager()">Close</button></div><div id="labelStatus" class="status"></div></section><div id="app"></div></main><div id="toast"></div>
 <script src="https://unpkg.com/html5-qrcode" defer></script><script>
 const DB="ToteInventoryV4", STORE="totes"; let db=null,scanner=null;
 const def=n=>({id:"T-"+String(n).padStart(3,"0"),rack:"Rack A",position:n,category:"",contents:"",quantity:"",condition:"Good",notes:"",photo:""});
@@ -58,26 +60,25 @@ async function addTote(){const a=await all(),n=a.reduce((m,x)=>Math.max(m,parseI
 async function photo(e,id){const f=e.target.files&&e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=async()=>{const x=await get(id);if(!x)return;x.photo=reader.result;await put(x);openTote(x);toast("Photo saved")};reader.readAsDataURL(f)}
 async function removePhoto(id){const x=await get(id);if(!x)return;x.photo="";await put(x);openTote(x);toast("Photo removed")}
 async function copyLink(id){const u=location.origin+location.pathname+"?tote="+encodeURIComponent(id);try{await navigator.clipboard.writeText(u);toast("QR link copied")}catch(e){prompt("Copy this QR link:",u)}}
-async function backup(){const a=sortTotes(await all()),payload={version:8,createdAt:new Date().toISOString(),totes:a},blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),aTag=document.createElement("a");aTag.href=url;aTag.download="tote-inventory-v8-backup.json";document.body.appendChild(aTag);aTag.click();aTag.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("V8 backup created")}
+async function backup(){const a=sortTotes(await all()),payload={version:9,createdAt:new Date().toISOString(),totes:a},blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),aTag=document.createElement("a");aTag.href=url;aTag.download="tote-inventory-v9-backup.json";document.body.appendChild(aTag);aTag.click();aTag.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast("V9 backup created")}
 function restore(e){const file=e.target.files&&e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result),incoming=Array.isArray(data)?data:(data.totes||[]);if(!Array.isArray(incoming))throw new Error();let count=0;for(const t of incoming){if(!t||!t.id)continue;await put({...def(parseInt(String(t.id).replace(/\D/g,""))||1),...t,id:String(t.id).toUpperCase()});count++}render();toast(`${count} totes restored`)}catch(err){alert("Invalid backup file.")}finally{e.target.value=""}};reader.readAsText(file)}
 async function startScan(){const box=document.getElementById("scannerBox");box.style.display="block";document.getElementById("reader").innerHTML="";if(typeof Html5Qrcode==="undefined"){document.getElementById("reader").innerHTML="<p>Scanner library is still loading. Wait a moment and tap Scan QR again.</p>";return}try{scanner=new Html5Qrcode("reader");const formats=[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.ITF,Html5QrcodeSupportedFormats.DATA_MATRIX].filter(v=>v!==undefined);await scanner.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250},formatsToSupport:formats},async text=>{const id=normalizeToteId(text),x=await get(id);if(x){stopScan();openTote(x);toast(id+" opened")}else{stopScan();alert("Tote not found: "+text+"\n\nRead as: "+id)}})}catch(err){document.getElementById("reader").innerHTML="<p>Camera access was unavailable. Check Safari camera permission for this site.</p>"}}
 function stopScan(){if(scanner){scanner.stop().catch(()=>{}).finally(()=>{scanner=null})}document.getElementById("scannerBox").style.display="none"}
 function toast(message){const x=document.getElementById("toast");x.textContent=message;x.style.display="block";clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.style.display="none",1800)}
 
-async function printLabels(){
-  const totes=sortTotes(await all());
-  if(!totes.length){toast("No totes to print");return}
-  const w=window.open("","_blank");
-  if(!w){alert("Safari blocked the label window. Allow pop-ups for this site, then try again.");return}
-  const base=location.origin+location.pathname;
-  const labels=totes.map(x=>{
-    const url=base+"?tote="+encodeURIComponent(x.id);
-    const qr="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(url);
-    return `<div class="label"><img src="${qr}" alt="QR ${escAttr(x.id)}"><div class="id">${esc(x.id)}</div><div class="sub">Tote Inventory</div></div>`;
-  }).join("");
-  w.document.write(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tote Inventory QR Labels</title><style>@page{size:letter;margin:.35in}*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.sheet{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.label{height:2.35in;border:1px dashed #999;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7px;page-break-inside:avoid}.label img{width:1.45in;height:1.45in}.id{font-size:22px;font-weight:800;margin-top:4px}.sub{font-size:10px;color:#555;margin-top:1px}</style></head><body><div class="sheet">${labels}</div><script>window.addEventListener("load",()=>setTimeout(()=>window.print(),800));<\/script></body></html>`);
-  w.document.close();
-  toast(`${totes.length} QR labels prepared`);
-}
+async function openLabelManager(){const box=document.getElementById("labelManager");box.style.display="block";await renderLabelList();box.scrollIntoView({behavior:"smooth",block:"start"})}
+function closeLabelManager(){document.getElementById("labelManager").style.display="none"}
+function toteNumber(id){const m=String(id||"").match(/(\d+)/);return m?parseInt(m[1],10):0}
+async function renderLabelList(){const totes=sortTotes(await all()),list=document.getElementById("labelList");list.innerHTML=totes.length?totes.map(x=>`<label class="label-row"><input type="checkbox" class="label-check" value="${escAttr(x.id)}"><span class="label-name">${esc(x.id)}</span><span class="label-info">${esc(x.category||"No category")}</span></label>`).join(""):"<div class=\"empty\">No totes found.</div>";updateLabelStatus()}
+function checks(){return Array.from(document.querySelectorAll(".label-check"))}
+function setChecked(ids){const wanted=new Set(ids.map(normalizeToteId));checks().forEach(c=>c.checked=wanted.has(c.value));updateLabelStatus()}
+function selectAllLabels(){checks().forEach(c=>c.checked=true);updateLabelStatus()}
+function clearLabelSelection(){checks().forEach(c=>c.checked=false);updateLabelStatus()}
+function selectLabelRange(){const a=toteNumber(normalizeToteId(document.getElementById("labelFrom").value)),b=toteNumber(normalizeToteId(document.getElementById("labelTo").value));if(!a||!b){alert("Enter a valid range, such as T-001 to T-020.");return}const lo=Math.min(a,b),hi=Math.max(a,b);setChecked(checks().map(c=>c.value).filter(id=>{const n=toteNumber(id);return n>=lo&&n<=hi}))}
+function applyLabelPreset(){const p=document.getElementById("labelPreset").value;if(p==="all")selectAllLabels();else if(p==="first20")setChecked(checks().map(c=>c.value).filter(id=>toteNumber(id)>=1&&toteNumber(id)<=20));else if(p==="none")clearLabelSelection();else if(p==="range")selectLabelRange()}
+document.addEventListener("change",e=>{if(e.target.classList&&e.target.classList.contains("label-check"))updateLabelStatus()});
+function updateLabelStatus(){const n=checks().filter(c=>c.checked).length,x=document.getElementById("labelStatus");if(x)x.textContent=`${n} label${n===1?"":"s"} selected`}
+async function printSelectedLabels(){const ids=checks().filter(c=>c.checked).map(c=>c.value);if(!ids.length){alert("Select at least one tote label.");return}const totes=[];for(const id of ids){const x=await get(id);if(x)totes.push(x)}const size=document.getElementById("labelSize").value;const d=size==="small"?{w:"2in",h:"1.5in",qr:"0.9in",fs:"18px",cols:3}:size==="large"?{w:"2.75in",h:"3in",qr:"2in",fs:"25px",cols:2}:{w:"2.35in",h:"2.35in",qr:"1.45in",fs:"22px",cols:3};const w=window.open("","_blank");if(!w){alert("Safari blocked the label window. Allow pop-ups for this site, then try again.");return}const base=location.origin+location.pathname;const labels=totes.map(x=>{const url=base+"?tote="+encodeURIComponent(x.id);const qr="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(url);return `<div class="label"><img src="${qr}" alt="QR ${escAttr(x.id)}"><div class="id">${esc(x.id)}</div><div class="sub">Tote Inventory</div></div>`}).join("");w.document.write(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tote Inventory QR Labels</title><style>@page{size:letter;margin:.35in}*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.sheet{display:grid;grid-template-columns:repeat(${d.cols},${d.w});gap:10px;align-items:start}.label{width:${d.w};height:${d.h};border:1px dashed #999;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7px;page-break-inside:avoid}.label img{width:${d.qr};height:${d.qr}}.id{font-size:${d.fs};font-weight:800;margin-top:4px}.sub{font-size:10px;color:#555;margin-top:1px}</style></head><body><div class="sheet">${labels}</div><script>window.addEventListener("load",()=>setTimeout(()=>window.print(),900));<\/script></body></html>`);w.document.close();toast(`${totes.length} QR labels prepared`)}
+async function printLabels(){await openLabelManager();selectAllLabels();await printSelectedLabels()}
 init().catch(()=>{document.getElementById("app").innerHTML='<section class="card"><b>IndexedDB could not be opened.</b><p>Make sure this page is not being used in Safari Private Browsing.</p></section>'});
 </script></body></html>
