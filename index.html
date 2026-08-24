@@ -38,7 +38,7 @@ label{display:block;font-weight:750;margin:5px 0 6px}h2{font-size:28px;margin:0 
 <button onclick="addTote()">➕ New Tote</button><button onclick="saveAllVisible()">💾 Save All</button><button onclick="openLabelManager()">🏷️ QR Labels</button>
 </div><div class="stats"><span id="count">0 totes</span><span>•</span><span>IndexedDB storage</span></div>
 <div class="notice"><b>V11 FINAL:</b> QR + barcode scanning, photos, easier editing, persistent IndexedDB storage, backup/restore, and printable QR labels.
-<div class="small" style="margin-top:5px">Use normal Safari browsing, not Private Browsing, for permanent local storage.</div></div></section><section id="labelManager" class="card" style="display:none"><h2 style="font-size:24px">🏷️ QR Label Manager</h2><p class="muted">Choose which totes to print and the label size.</p><div class="grid"><div><label>Label size</label><select id="labelSize"><option value="small">Small — 2" × 1.5"</option><option value="medium" selected>Medium — 2.35" × 2.35"</option><option value="large">Large — 2.75" × 3.0"</option></select></div><div><label>Quick selection</label><select id="labelPreset" onchange="applyLabelPreset()"><option value="all">All totes</option><option value="first20">T-001 to T-020</option><option value="range">Choose a range</option><option value="none">Clear selection</option></select></div><div><label>From</label><input id="labelFrom" value="T-001" placeholder="T-001"></div><div><label>To</label><input id="labelTo" value="T-020" placeholder="T-020"></div></div><div class="tools" style="margin-top:12px"><button onclick="selectLabelRange()">Select Range</button><button onclick="selectAllLabels()">Select All</button><button onclick="clearLabelSelection()">Clear All</button></div><div class="notice" style="margin-top:12px"><b>V10 Label Content</b><div class="tools" style="margin-top:8px"><label><input id="showCategory" type="checkbox" checked> Category</label><label><input id="showContents" type="checkbox" checked> Contents</label><label><input id="showRack" type="checkbox"> Rack / Position</label></div><div class="small" style="margin-top:6px">Tote number is always printed in large type.</div></div><div id="labelList" style="margin-top:14px"></div><div class="tools" style="margin-top:14px"><button class="primary" onclick="printSelectedLabels()">🖨️ Print Selected Labels</button><button onclick="closeLabelManager()">Close</button></div><div id="labelStatus" class="status"></div></section><section class="card"><h2 style="font-size:20px">📸 Photo Test</h2><p class="muted">Use this with T-001 to verify an iPhone photo survives closing and reopening Safari.</p><div class="tools"><button class="blue" onclick="document.getElementById('photoTestInput').click()">📷 Test T-001 Photo</button><input id="photoTestInput" type="file" accept="image/*" capture="environment" onchange="photoTestSelected(event)" style="display:none"><button onclick="verifyPhoto()">✓ Verify Saved Photo</button><button class="danger" onclick="clearTestData()">🧹 Clear Test Data</button></div><div id="photoTestStatus" class="status"></div></section><div id="app"></div></main><div id="toast"></div>
+<div class="small" style="margin-top:5px">Use normal Safari browsing, not Private Browsing, for permanent local storage.</div></div></section><section id="labelManager" class="card" style="display:none"><h2 style="font-size:24px">🏷️ QR Label Manager</h2><p class="muted">Choose which totes to print and the label size.</p><div class="grid"><div><label>Label size</label><select id="labelSize"><option value="small">Small — 2" × 1.5"</option><option value="medium" selected>Medium — 2.35" × 2.35"</option><option value="large">Large — 2.75" × 3.0"</option></select></div><div><label>Quick selection</label><select id="labelPreset" onchange="applyLabelPreset()"><option value="all">All totes</option><option value="first20">T-001 to T-020</option><option value="range">Choose a range</option><option value="none">Clear selection</option></select></div><div><label>From</label><input id="labelFrom" value="T-001" placeholder="T-001"></div><div><label>To</label><input id="labelTo" value="T-020" placeholder="T-020"></div></div><div class="tools" style="margin-top:12px"><button onclick="selectLabelRange()">Select Range</button><button onclick="selectAllLabels()">Select All</button><button onclick="clearLabelSelection()">Clear All</button></div><div class="notice" style="margin-top:12px"><b>V10 Label Content</b><div class="tools" style="margin-top:8px"><label><input id="showCategory" type="checkbox" checked> Category</label><label><input id="showContents" type="checkbox" checked> Contents</label><label><input id="showRack" type="checkbox"> Rack / Position</label></div><div class="small" style="margin-top:6px">Tote number is always printed in large type.</div></div><div id="labelList" style="margin-top:14px"></div><div class="tools" style="margin-top:14px"><button class="primary" onclick="printSelectedLabels()">🖨️ Print Selected Labels</button><button onclick="closeLabelManager()">Close</button></div><div id="labelStatus" class="status"></div></section><section class="card"><h2 style="font-size:20px">📸 Photo Test</h2><p class="muted">Use this with T-001 to verify an iPhone photo survives closing and reopening Safari.</p><div class="tools"><button class="blue" onclick="document.getElementById('photoTestInput').click()">📷 Test T-001 Photo</button><input id="photoTestInput" type="file" accept="image/*" capture="environment" onchange="photoTestSelected(event)" style="display:none"><button onclick="verifyPhoto()">✓ Verify Saved Photo</button><button class="danger" onclick="clearTestData()">🧹 Clear Test Data (T-001 + T-021)</button></div><div id="photoTestStatus" class="status"></div></section><div id="app"></div></main><div id="toast"></div>
 <script src="https://unpkg.com/html5-qrcode" defer></script><script>
 const DB="ToteInventoryV4", STORE="totes"; let db=null,scanner=null;
 const def=n=>({id:"T-"+String(n).padStart(3,"0"),rack:"Rack A",position:n,category:"",contents:"",quantity:"",condition:"Good",notes:"",photo:"",updatedAt:""});
@@ -58,36 +58,41 @@ function openTote(x){history.replaceState(null,"",location.pathname+"?tote="+enc
 function showAll(){history.replaceState(null,"",location.pathname);document.getElementById("search").value="";render();window.scrollTo({top:0,behavior:"smooth"})}
 async function clearTestData(){
   const ok=confirm(
-    "Clear the testing data from T-001?\n\n"+
-    "This will remove the test photo, category, quantity, contents and notes from T-001.\n"+
-    "T-001 itself will NOT be deleted.\n\n"+
-    "Your other totes will not be changed."
+    "Clear ALL test data?\n\n"+
+    "• T-001: remove the test photo and test information\n"+
+    "• T-021: permanently delete this test tote\n\n"+
+    "T-001 through T-020 will remain. Your other totes will not be changed."
   );
   if(!ok)return;
 
   const x=await get("T-001");
-  if(!x){alert("T-001 was not found.");return}
+  if(x){
+    x.category="";
+    x.quantity="";
+    x.contents="";
+    x.condition="Good";
+    x.notes="";
+    x.photo="";
+    x.updatedAt=new Date().toISOString();
+    await put(x);
+  }
 
-  x.category="";
-  x.quantity="";
-  x.contents="";
-  x.condition="Good";
-  x.notes="";
-  x.photo="";
-  x.updatedAt=new Date().toISOString();
+  // Delete the known test tote T-021 completely.
+  const t21=await get("T-021");
+  if(t21){
+    await req("readwrite","delete","T-021");
+  }
 
-  await put(x);
-
-  // Remove the temporary test status message.
   const s=document.getElementById("photoTestStatus");
   if(s){
-    s.textContent="✓ Test data and test photo removed from T-001.";
+    s.textContent="✓ Test data cleared: T-001 reset and T-021 deleted.";
     s.style.color="#166534";
   }
 
-  // If T-001 is currently open, refresh it immediately.
-  openTote(x);
-  toast("T-001 test data cleared ✓");
+  history.replaceState(null,"",location.pathname);
+  document.getElementById("search").value="";
+  await render();
+  toast("Test data cleared ✓");
 }
 
 async function saveAllVisible(){const cards=[...document.querySelectorAll('[id^="card-"]')];let saved=0;for(const card of cards){const id=card.id.slice(5),x=await get(id);if(!x)continue;const c=document.getElementById(id+"c"),q=document.getElementById(id+"q"),i=document.getElementById(id+"i"),d=document.getElementById(id+"d"),n=document.getElementById(id+"n");if(!c||!q||!i||!d||!n)continue;x.category=c.value;x.quantity=q.value;x.contents=i.value;x.condition=d.value;x.notes=n.value;x.updatedAt=new Date().toISOString();await put(x);saved++}toast(`${saved} totes saved ✓`);await render()}
